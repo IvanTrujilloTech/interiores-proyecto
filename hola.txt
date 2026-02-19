@@ -1,0 +1,185 @@
+# Proyecto: Diseñador de Interiores 3D
+
+## Descripción del Proyecto
+
+Este proyecto es un **diseñador de interiores 3D interactivo** que permite a los usuarios crear habitaciones virtuales y agregar muebles para visualizar cómo quedaría un espacio antes de realizar cambios reales. La aplicación utiliza tecnologías modernas para proporcionar una experiencia de usuario fluida y realista.
+
+## Tecnologías Utilizadas
+
+### 1. **Framework y Librerías Principales**
+
+- **Vue 3**: Framework JavaScript para la construcción de interfaces de usuario. Utilizado con la sintaxis **Composition API** y **setup script** para una escritura más limpia y modular.
+- **TypeScript**: Superconjunto de JavaScript que agrega tipado estático, mejorando la calidad del código y la productividad.
+- **Three.js**: Librería 3D para renderizar gráficos en navegador utilizando WebGL. Permite la creación de escenas 3D interactivas.
+- **Pinia**: Tienda de estado gestora para Vue 3, simplificando el manejo de datos entre componentes.
+- **Vite**: Herramienta de construcción rápida para proyectos Vue, optimizada para el desarrollo moderno.
+
+### 2. **Dependencias del Proyecto**
+
+```json
+{
+  "dependencies": {
+    "pinia": "^2.1.7",        // Gestión de estado
+    "three": "^0.160.0",      // Gráficos 3D
+    "vue": "^3.4.0",          // Framework principal
+    "vue-router": "^4.2.5"    // Navegación entre rutas
+  },
+  "devDependencies": {
+    "@types/three": "^0.182.0",    // Tipos TypeScript para Three.js
+    "@vitejs/plugin-vue": "^5.0.2", // Plugin Vite para Vue
+    "typescript": "~5.3.3",        // Tipado estático
+    "vite": "^5.0.10",             // Herramienta de construcción
+    "vue-tsc": "^1.8.27"           // Compilador TypeScript para Vue
+  }
+}
+```
+
+## Estructura del Proyecto
+
+### Archivos Principales
+
+```
+src/
+├── components/                 # Componentes reutilizables
+│   ├── FurnitureSidebar.vue    # Sidebar con muebles drag-and-drop
+│   ├── RoomScene.vue           # Escena 3D principal
+│   └── TopBar.vue              # Barra superior con título y botón de limpiar
+├── stores/                     # Tiendas de estado (Pinia)
+│   └── furnitureStore.ts       # Almacena la lista de muebles y acciones
+├── views/                      # Vistas de la aplicación
+│   └── HomeView.vue            # Vista principal
+├── router/                     # Navegación (Vue Router)
+│   └── index.ts                # Configuración de rutas
+├── App.vue                     # Componente raíz
+└── main.ts                     # Punto de entrada de la aplicación
+```
+
+## Funcionamiento de la Aplicación
+
+### 1. **Configuración Inicial**
+
+El punto de entrada de la aplicación es [`main.ts`](src/main.ts), donde se inicializa Vue, Pinia y Vue Router. La aplicación carga la vista principal [`HomeView.vue`](src/views/HomeView.vue), que contiene la estructura básica.
+
+### 2. **Componentes Principales**
+
+#### a) [`TopBar.vue`](src/components/TopBar.vue)
+
+- **Función**: Muestra el título de la aplicación y un botón para limpiar todos los muebles de la escena.
+- **Implementación**:
+  - Utiliza el store de Pinia para acceder a la función `clearAll`.
+  - Muestra un confirmador antes de borrar todos los muebles.
+
+#### b) [`FurnitureSidebar.vue`](src/components/FurnitureSidebar.vue)
+
+- **Función**: Permite a los usuarios arrastrar y soltar muebles en la escena 3D.
+- **Implementación**:
+  - Define items de mueble como elementos HTML5 draggable.
+  - Al iniciar el arrastre, guarda el tipo de mueble en el `dataTransfer` del evento.
+  - Incluye estilos para indicar el estado hover y active.
+
+#### c) [`RoomScene.vue`](src/components/RoomScene.vue)
+
+Este es el componente más complejo de la aplicación:
+
+- **Función**: Renderiza la escena 3D, gestiona la interacción del usuario y carga los modelos 3D.
+- **Implementación**:
+  - **Inicialización**: Crea la escena, cámara y renderer al montar el componente.
+  - **Control de Cámara**: Utiliza `OrbitControls` de Three.js para permitir la rotación y zoom de la vista.
+  - **Carga de Modelos**: Usa `GLTFLoader` para cargar modelos 3D en formato GLB desde el directorio `modelos/`.
+  - **Droppable Area**: Permite soltar muebles arrastrados desde la sidebar.
+  - **Selección de Muebles**: Detecta clics en muebles y muestra botones de rotación y eliminación.
+  - **Sombreado y Luces**: Configura luces ambientales y direccionales para mejorar la visualización.
+
+### 3. **Gestión de Estado**
+
+#### [`furnitureStore.ts`](src/stores/furnitureStore.ts)
+
+- **Función**: Almacena la lista de muebles y las acciones para manipularlos.
+- **Estado**:
+  - `items`: Arreglo de objetos de tipo `FurnitureItem` con id, tipo, posición y rotación.
+- **Acciones**:
+  - `addFurniture`: Añade un nuevo mueble a la lista.
+  - `removeFurniture`: Elimina un mueble por id.
+  - `updateFurniturePosition`: Actualiza la posición de un mueble.
+  - `rotateFurniture`: Gira un mueble 90 grados.
+  - `clearAll`: Elimina todos los muebles.
+- **Getters**:
+  - `totalItems`: Devuelve la cantidad total de muebles.
+
+## Conceptos Clave
+
+### 1. **Sistema de Arrastrar y Soltar**
+
+La aplicación utiliza la API de HTML5 Drag and Drop:
+
+- En `FurnitureSidebar.vue`, los items se marcan como `draggable="true"`.
+- El evento `dragstart` guarda el tipo de mueble.
+- En `RoomScene.vue`, el evento `drop` detecta la posición del mouse y coloca el mueble en la escena.
+
+### 2. **Detección de Intersecciones**
+
+Para la selección de muebles:
+
+- Se usa `Raycaster` de Three.js para proyectar un rayo desde la posición del mouse.
+- La función `intersectObjects` busca intersecciones con los muebles.
+- Se recorre la escena gráficamente desde el punto de intersección para encontrar el objeto padre que contiene los datos del mueble.
+
+### 3. **Carga de Modelos 3D**
+
+Los modelos se cargan en formato GLB usando `GLTFLoader`:
+
+- Se ajusta la posición de cada modelo para que se coloque en el suelo.
+- Se configuran las sombras para mejorar la iluminación.
+- Los modelos se almacenan en un diccionario para un acceso rápido.
+
+## Ejecución del Proyecto
+
+### Instalación de Dependencias
+
+```bash
+npm install
+```
+
+### Desarrollo
+
+```bash
+npm run dev
+```
+
+### Construcción para Producción
+
+```bash
+npm run build
+```
+
+### Vista Previa de la Construcción
+
+```bash
+npm run preview
+```
+
+## Funcionalidades Implementadas
+
+1. **Agregar Muebles**: Arrastrar y soltar muebles desde la sidebar a la escena.
+2. **Rotar Muebles**: Seleccionar un mueble y hacer clic en el botón de rotación.
+3. **Eliminar Muebles**: Seleccionar un mueble y hacer clic en el botón de eliminar.
+4. **Limpiar Escena**: Eliminar todos los muebles de la escena.
+5. **Interacción 3D**: Rotar y zoom de la vista con el ratón.
+
+## Problemas Resueltos
+
+1. **Importación de Módulos Three.js**: Cambio de la ruta import para compatibilidad con versiones modernas de Three.js.
+2. **Detección de Clic en Muebles**: Habilitación de la detección de intersecciones recursivas para muebles compuestos por múltiples meshes.
+3. **Tipado Estático**: Fix de errores de TypeScript al manejar objetos Three.js.
+
+## Mejoras Potenciales
+
+1. **Más Tipos de Muebles**: Agregar más modelos 3D para una variedad mayor.
+2. **Color y Materiales**: Permitir cambiar los colores y materiales de los muebles.
+3. **Guardado y Carga**: Implementar la opción de guardar y cargar escenas.
+4. **Exportación de Imágenes**: Permitir exportar la escena como una imagen.
+5. **Colisión de Objetos**: Agregar detección de colisión para evitar superposiciones de muebles.
+
+## Conclusión
+
+Este proyecto demuestra la integración de Vue 3, Three.js y Pinia para crear una aplicación 3D interactiva. La arquitectura modular y la separación de responsabilidades entre componentes y store hace que el código sea mantenible y escalable. El uso de TypeScript mejora la calidad del código y reduce los errores.
