@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 https://github.com/IvanTrujilloTech/interiores-proyecto
+=======
+https://github.com/IvanTrujilloTech/interiores-proyecto
+>>>>>>> 57177cddd350f0346218162b1ef16c40467d4211
